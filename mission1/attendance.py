@@ -1,7 +1,12 @@
 from schema import Player
 
-id1 = {}
+# name, id
+name_dict = {}
+
+# id, player
+player_info = {}
 id_cnt = 0
+total_player = 0
 
 # dat[사용자ID][요일]
 dat = [[0] * 100 for _ in range(100)]
@@ -12,79 +17,74 @@ wed = [0] * 100
 weeken = [0] * 100
 attendance_file = "mission1/attendance_weekday_500.txt"
 
+def get_new_id():
 
-def input2(w, wk):
-    global id_cnt
+    id_list = []
+    for name, id in name_dict.items():
+        id_list.append(id)
 
-    if w not in id1:
-        id_cnt += 1
-        id1[w] = id_cnt
-        names[id_cnt] = w
+    return max(id_list) + 1
 
-    id2 = id1[w]
+def get_id_from_name(name):
 
-    add_point = 0
-    index = 0
+    global player_info, total_player, name_dict
+    if name in name_dict.keys():
+        return name_dict[name]
 
-    if wk == "monday":
-        index = 0
-        add_point += 1
-    elif wk == "tuesday":
-        index = 1
-        add_point += 1
-    elif wk == "wednesday":
-        index = 2
-        add_point += 3
-        wed[id2] += 1
-    elif wk == "thursday":
-        index = 3
-        add_point += 1
-    elif wk == "friday":
-        index = 4
-        add_point += 1
-    elif wk == "saturday":
-        index = 5
-        add_point += 2
-        weeken[id2] += 1
-    elif wk == "sunday":
-        index = 6
-        add_point += 2
-        weeken[id2] += 1
+    if len(name_dict) == 0:
+        new_id = 0
+    else:
+        new_id = get_new_id()
 
-    dat[id2][index] += 1
-    points[id2] += add_point
+    name_dict[name] = new_id
+    total_player += 1
+    player_info[new_id] = Player(id_number=new_id, name=name)
 
+    return new_id
 
-def input_file():
+def update_player_info(player, day):
+    player.update_playday(day)
+
+def update_attendance(name, day):
+
+    id = get_id_from_name(name)
+
+    update_player_info(player_info[id], day)
+
+def get_grade(points):
+    if points >= 50:
+        return 1
+
+    if points >= 30:
+        return 2
+
+    return 3
+
+def main():
     try:
         read_data()
 
-        for i in range(1, id_cnt + 1):
-            if dat[i][2] > 9:
-                points[i] += 10
-            if dat[i][5] + dat[i][6] > 9:
-                points[i] += 10
+        for id in range(total_player):
+            player_info[id].update_points()
 
-            if points[i] >= 50:
-                grade[i] = 1
-            elif points[i] >= 30:
-                grade[i] = 2
-            else:
-                grade[i] = 0
+            names = player_info[id].get_name()
+            points = player_info[id].get_points()
+            grade = get_grade(points)
 
-            print(f"NAME : {names[i]}, POINT : {points[i]}, GRADE : ", end="")
-            if grade[i] == 1:
+
+            print(f"NAME : {names}, POINT : {points}, GRADE : ", end="")
+            if grade == 1:
                 print("GOLD")
-            elif grade[i] == 2:
+            elif grade == 2:
                 print("SILVER")
             else:
                 print("NORMAL")
 
         print("\nRemoved player")
         print("==============")
-        for i in range(1, id_cnt + 1):
-            if grade[i] not in (1, 2) and wed[i] == 0 and weeken[i] == 0:
-                print(names[i])
+        # for i in range(1, id_cnt + 1):
+        #     if grade[i] not in (1, 2) and wed[i] == 0 and weeken[i] == 0:
+        #         print(names[i])
 
     except FileNotFoundError:
         print("파일을 찾을 수 없습니다.")
@@ -97,12 +97,12 @@ def read_data():
                 line = f.readline()
                 if not line:
                     break
-                parts = line.strip().split()
-                if len(parts) == 2:
-                    input2(parts[0], parts[1])
+                attendance_data = line.strip().split()
+                if len(attendance_data) == 2:
+                    update_attendance(name=attendance_data[0], day=attendance_data[1])
     except Exception as e:
         print(e)
 
 
 if __name__ == "__main__":
-    input_file()
+    main()
