@@ -18,3 +18,17 @@
 
 - attendance.py 의 93% 는 main 부분 pytest 에서 사용안함
 - <img width="304" height="99" alt="image" src="https://github.com/user-attachments/assets/dfdc72bb-14f1-4e29-8b5d-1a6e26bf0813" />
+
+
+
+## D1
+SPY 로 메서드 분리. printer abstractmethod 사용
+
+## D2
+함수별, 최종결과 unittest 사용
+
+## D3 
+client 코드 수정 없이 스키마.py 에서 get_grade 와 printer 에서 grade_dict 추가시 사용 가능
+
+## D4
+factory pattern 적용
