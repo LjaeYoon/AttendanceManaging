@@ -3,7 +3,8 @@ import pytest
 import attendance
 from attendance import main
 
-# @pytest.mark.skip()
+
+@pytest.mark.skip()
 def test_before_remove(capfd):
     same = """NAME : Umar, POINT : 48, GRADE : SILVER
 NAME : Daisy, POINT : 45, GRADE : SILVER
@@ -33,7 +34,8 @@ Removed player
     out, _ = capfd.readouterr()
     assert out == same
 
-@pytest.mark.skip()
+
+# @pytest.mark.skip()
 def test_after_remove(capfd):
     same = """NAME : Umar, POINT : 48, GRADE : SILVER
 NAME : Daisy, POINT : 45, GRADE : SILVER

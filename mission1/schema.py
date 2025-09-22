@@ -11,18 +11,23 @@ class PlayDay:
     sat: int = 0
     sun: int = 0
 
+    def count_training_day(self):
+        return self.wed + self.sat + self.sun
+
 
 @dataclass
 class Player:
     id: int
     name: str
     playday: PlayDay
+    remove: bool
     points: int = 0
 
     def __init__(self, id_number: int, name):
         self.id = int(id_number)
         self.name = name
         self.playday = PlayDay()
+        self.remove = False
 
     def update_playday(self, day):
         if day.lower() == "monday":
@@ -59,14 +64,19 @@ class Player:
 
         self.points = points
 
-    def get_points(self):
-        return self.points
+    def get_grade(self):
+        if self.points >= 50:
+            return 1
 
-    def get_name(self):
-        return self.name
+        if self.points >= 30:
+            return 2
 
+        return 3
 
+    def update_remove(self):
+        if self.get_grade() < 3:
+            self.remove = False
+            return
 
-
-
-
+        if self.playday.count_training_day() < 1:
+            self.remove = True
