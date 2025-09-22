@@ -1,86 +1,65 @@
 from schema import Player
 
-# name, id
-name_dict = {}
-
-# id, player
-player_info = {}
+name_id_data = {}
+id_player_data = {}
 total_player = 0
 
-# attendance_file = "mission1/attendance_weekday_500.txt"
-
-
 attendance_file = "attendance_weekday_500.txt"
+grade_dict = {
+    1: "GOLD",
+    2: "SILVER",
+    3: "NORMAL",
+}
+
 
 def get_new_id():
     id_list = []
-    for name, id in name_dict.items():
+    for name, id in name_id_data.items():
         id_list.append(id)
 
     return max(id_list) + 1
 
 
 def get_id_from_name(name):
-    global player_info, total_player, name_dict
-    if name in name_dict.keys():
-        return name_dict[name]
+    global id_player_data, total_player, name_id_data
+    if name in name_id_data.keys():
+        return name_id_data[name]
 
-    if len(name_dict) == 0:
+    if len(name_id_data) == 0:
         new_id = 0
     else:
         new_id = get_new_id()
 
-    name_dict[name] = new_id
+    name_id_data[name] = new_id
     total_player += 1
-    player_info[new_id] = Player(id_number=new_id, name=name)
+    id_player_data[new_id] = Player(id_number=new_id, name=name)
 
     return new_id
 
 
-def update_player_info(player, day):
-    player.update_playday(day)
-
-
 def update_attendance(name, day):
     id = get_id_from_name(name)
-
-    update_player_info(player_info[id], day)
-
-
-def get_grade(points):
-    if points >= 50:
-        return 1
-
-    if points >= 30:
-        return 2
-
-    return 3
+    id_player_data[id].update_playday(day)
 
 
 def print_remove_player():
     print("\nRemoved player")
     print("==============")
     for id in range(total_player):
-        player_info[id].update_remove()
-        if player_info[id].remove:
-            print(player_info[id].name)
+        id_player_data[id].update_remove()
+        if id_player_data[id].remove == True:
+            print(id_player_data[id].name)
 
 
 def print_all_player_info():
     for id in range(total_player):
-        player_info[id].update_points()
+        id_player_data[id].update_points()
 
-        name = player_info[id].name
-        points = player_info[id].points
-        grade = player_info[id].get_grade()
+        name = id_player_data[id].name
+        points = id_player_data[id].points
+        grade = id_player_data[id].get_grade()
 
-        print(f"NAME : {name}, POINT : {points}, GRADE : ", end="")
-        if grade == 1:
-            print("GOLD")
-        elif grade == 2:
-            print("SILVER")
-        else:
-            print("NORMAL")
+        print(f"NAME : {name}, POINT : {points}, GRADE : {grade_dict[grade]}")
 
 
 def read_data():
@@ -93,6 +72,10 @@ def read_data():
                 attendance_data = line.strip().split()
                 if len(attendance_data) == 2:
                     update_attendance(name=attendance_data[0], day=attendance_data[1])
+                else:
+                    print("Wrong input type error")
+                    raise TypeError
+
     except FileNotFoundError as e:
         print(f"파일을 찾을 수 없습니다. {e}")
 
