@@ -1,115 +1,44 @@
-from schema import Player
+from attendance_factory import AttendanceFactory
 
-name_id_data = {}
-id_player_data = {}
-total_player = 0
+ATTENDANCEFILE = "attendance_weekday_500.txt"
 
-attendance_file = "attendance_weekday_500.txt"
-grade_dict = {
-    1: "GOLD",
-    2: "SILVER",
-    3: "NORMAL",
-}
-
-
-def get_new_id():
-    id_list = []
-    for name, id in name_id_data.items():
-        id_list.append(id)
-
-    return max(id_list) + 1
-
-
-def get_id_from_name(name):
-    global id_player_data, total_player, name_id_data
-    if name in name_id_data.keys():
-        return name_id_data[name]
-
-    if len(name_id_data) == 0:
-        new_id = 0
-    else:
-        new_id = get_new_id()
-
-    name_id_data[name] = new_id
-    total_player += 1
-    id_player_data[new_id] = Player(id_number=new_id, name=name)
-
-    return new_id
-
-
-def update_attendance(name, day):
-    id = get_id_from_name(name)
-    id_player_data[id].update_playday(day)
-
-
-def print_remove_player():
-    print("\nRemoved player")
-    print("==============")
-    for id in range(total_player):
-        id_player_data[id].update_remove()
-        if id_player_data[id].remove == True:
-            print(id_player_data[id].name)
-
-
-def print_all_player_info():
-    for id in range(total_player):
-        id_player_data[id].update_points()
-
-        name = id_player_data[id].name
-        points = id_player_data[id].points
-        grade = id_player_data[id].get_grade()
-
-        print(f"NAME : {name}, POINT : {points}, GRADE : {grade_dict[grade]}")
-
-
-def read_data():
-    try:
-        with open(attendance_file, encoding='utf-8') as f:
-            while True:
-                line = f.readline()
-                if not line:
-                    break
-                attendance_data = line.strip().split()
-                if len(attendance_data) == 2:
-                    update_attendance(name=attendance_data[0], day=attendance_data[1])
-                else:
-                    print("Wrong input type error")
-                    raise TypeError
-
-    except FileNotFoundError as e:
-        print(f"파일을 찾을 수 없습니다. {e}")
 
 class Attendance:
+    id_player_data: dict
 
     def __init__(self):
-        self.name_id_dict = dict()
-        self.id_player_data_dict = dict()
+        self.attendance_factory = AttendanceFactory(ATTENDANCEFILE)
 
-    def get_total_player(self):
-        return len(self.id_player_data_dict)
+    def run(self):
+        text_datas = self.attendance_factory.data_handler.load_data()
+        line_datas = self.attendance_factory.data_handler.refine_data(text_datas)
 
-    def read_data(self, data_path):
-        try:
-            with open(data_path, encoding='utf-8') as f:
-                while True:
-                    line = f.readline()
-                    if not line:
-                        break
-                    attendance_data = line.strip().split()
-                    if len(attendance_data) == 2:
-                        update_attendance(name=attendance_data[0], day=attendance_data[1])
-                    else:
-                        print("Wrong input type error")
-                        raise TypeError
+        self.update_player_data(line_datas)
+        self.id_player_data = self.attendance_factory.data_handler.get_id_player_data()
+        self.update_player_points_and_remove()
 
-        except FileNotFoundError as e:
-            print(f"파일을 찾을 수 없습니다. {e}")
+        self.attendance_factory.remover_printer.update_data(self.id_player_data)
+        self.attendance_factory.info_printer.update_data(self.id_player_data)
 
-def main():
-    read_data()
-    print_all_player_info()
-    print_remove_player()
+        self.print_all()
+
+    def get_player_counts(self):
+        return len(self.id_player_data)
+
+    def update_player_data(self, line_datas):
+        for [name, playday] in line_datas:
+            self.attendance_factory.data_handler.update_playday(name, playday)
+
+    def update_player_points_and_remove(self):
+        player_counts = self.get_player_counts()
+        for player in range(player_counts):
+            self.id_player_data[player].update_points()
+
+    def print_all(self):
+        self.attendance_factory.info_printer.print()
+        self.attendance_factory.remover_printer.print()
 
 
 if __name__ == "__main__":
-    main()
+    attendance = Attendance()
+    attendance.run()
