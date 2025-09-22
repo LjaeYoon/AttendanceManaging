@@ -4,8 +4,7 @@ name_id_data = {}
 id_player_data = {}
 total_player = 0
 
-attendance_file = "mission1/attendance_weekday_500.txt"
-# attendance_file = "attendance_weekday_500.txt"
+attendance_file = "attendance_weekday_500.txt"
 grade_dict = {
     1: "GOLD",
     2: "SILVER",
@@ -80,6 +79,31 @@ def read_data():
     except FileNotFoundError as e:
         print(f"파일을 찾을 수 없습니다. {e}")
 
+class Attendance:
+
+    def __init__(self):
+        self.name_id_dict = dict()
+        self.id_player_data_dict = dict()
+
+    def get_total_player(self):
+        return len(self.id_player_data_dict)
+
+    def read_data(self, data_path):
+        try:
+            with open(data_path, encoding='utf-8') as f:
+                while True:
+                    line = f.readline()
+                    if not line:
+                        break
+                    attendance_data = line.strip().split()
+                    if len(attendance_data) == 2:
+                        update_attendance(name=attendance_data[0], day=attendance_data[1])
+                    else:
+                        print("Wrong input type error")
+                        raise TypeError
+
+        except FileNotFoundError as e:
+            print(f"파일을 찾을 수 없습니다. {e}")
 
 def main():
     read_data()
