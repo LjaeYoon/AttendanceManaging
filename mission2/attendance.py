@@ -10,17 +10,26 @@ class Attendance:
         self.attendance_factory = AttendanceFactory(ATTENDANCEFILE)
 
     def run(self):
-        text_datas = self.attendance_factory.data_handler.load_data()
-        line_datas = self.attendance_factory.data_handler.refine_data(text_datas)
+        line_datas = self.load_data()
 
+        self.update_data(line_datas)
+        self.update_printer()
+
+        self.print_all()
+
+    def update_data(self, line_datas):
         self.update_player_data(line_datas)
         self.id_player_data = self.attendance_factory.data_handler.get_id_player_data()
         self.update_player_points_and_remove()
 
+    def load_data(self) -> list:
+        text_datas = self.attendance_factory.data_handler.load_data()
+        line_datas = self.attendance_factory.data_handler.refine_data(text_datas)
+        return line_datas
+
+    def update_printer(self):
         self.attendance_factory.remover_printer.update_data(self.id_player_data)
         self.attendance_factory.info_printer.update_data(self.id_player_data)
-
-        self.print_all()
 
     def get_player_counts(self):
         return len(self.id_player_data)
